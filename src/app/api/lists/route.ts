@@ -29,11 +29,11 @@ export async function GET() {
         orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(lists.map(l => ({
+    return NextResponse.json(lists.map((l: any) => ({
         id: l.id,
         name: l.name,
         createdAt: l.createdAt.getTime(),
-        companyIds: l.companies.map(c => c.companyId),
+        companyIds: l.companies.map((c: any) => c.companyId),
     })));
 }
 

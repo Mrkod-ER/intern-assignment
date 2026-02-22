@@ -25,7 +25,7 @@ export async function GET() {
         orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(companies.map(c => ({
+    return NextResponse.json(companies.map((c: any) => ({
         id: c.id,
         name: c.name,
         website: c.website,

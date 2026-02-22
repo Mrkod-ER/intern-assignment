@@ -25,7 +25,7 @@ export async function GET() {
         orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(searches.map(s => ({
+    return NextResponse.json(searches.map((s: any) => ({
         id: s.id,
         query: s.query,
         filters: JSON.parse(s.filtersJson),
