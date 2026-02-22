@@ -22,6 +22,15 @@ export async function POST(request: Request) {
 
         const markdownContent = await response.text();
 
+        // Check if the target site blocked the Jina AI scraper (e.g., Cloudflare, Cloudfront 403/401)
+        if (markdownContent.includes('Target URL returned error') ||
+            markdownContent.includes('Request blocked.') ||
+            markdownContent.includes('403 Forbidden')) {
+            return NextResponse.json({
+                error: 'The website actively blocked our AI scraper. (Anti-bot protection)'
+            }, { status: 403 });
+        }
+
         if (!process.env.GEMINI_API_KEY) {
             return NextResponse.json({ error: 'GEMINI_API_KEY is not configured' }, { status: 500 });
         }
@@ -59,8 +68,14 @@ export async function POST(request: Request) {
             sources: [{ url: jinaUrl, timestamp: new Date().toISOString() }]
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Enrichment API Error:', error);
-        return NextResponse.json({ error: 'Failed to process enrichment' }, { status: 500 });
+
+        // Return a cleaner error if Gemini failed to output valid JSON (e.g. when confused by a block page)
+        if (error instanceof SyntaxError) {
+            return NextResponse.json({ error: 'AI failed to parse the website content into a structured format.' }, { status: 500 });
+        }
+
+        return NextResponse.json({ error: error.message || 'Failed to process enrichment' }, { status: 500 });
     }
 }

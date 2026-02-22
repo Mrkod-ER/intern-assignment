@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
 
@@ -50,63 +49,102 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background px-4">
-            <Card className="w-full max-w-md shadow-2xl border-border">
-                <CardHeader className="space-y-3 text-center">
-                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-2">
-                        <span className="text-white font-bold text-xl">VC</span>
+        <div className="min-h-screen grid lg:grid-cols-2 bg-background">
+            {/* Left Column - Branding */}
+            <div className="hidden lg:flex flex-col justify-between bg-zinc-950 p-12 text-zinc-400 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-transparent to-transparent opacity-50" />
+                <Link href="/" className="relative z-10 flex items-center gap-2 text-white w-max">
+                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <span className="font-bold text-sm">VC</span>
                     </div>
-                    <CardTitle className="text-3xl font-extrabold text-foreground">Sign in</CardTitle>
-                    <CardDescription className="text-muted-foreground pt-1">
-                        Don't have an account?{' '}
-                        <Link href="/signup" className="font-medium text-blue-500 hover:text-blue-400">
-                            Create a new account
-                        </Link>
-                    </CardDescription>
-                </CardHeader>
+                    <span className="font-semibold text-lg tracking-tight hover:text-blue-400 transition-colors">Scout</span>
+                </Link>
 
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="email" className="text-muted-foreground">Email address</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="analyst@sequoia.com"
-                                className="bg-muted focus-visible:ring-1"
-                            />
+                <div className="relative z-10">
+                    <blockquote className="text-3xl font-medium leading-tight text-white mb-6">
+                        "VC Scout transformed our thesis from a Google Doc into an always-on pipeline. We're seeing signal before anyone else."
+                    </blockquote>
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-zinc-800 border-2 border-zinc-700 font-bold flex items-center justify-center text-white">
+                            RS
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password" className="text-muted-foreground">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className="bg-muted focus-visible:ring-1"
-                            />
+                        <div>
+                            <div className="text-white font-medium">Roelof Sequoia</div>
+                            <div className="text-sm">Partner, Sequoia Capital</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Column - Form */}
+            <div className="flex items-center justify-center p-8 bg-black/40 backdrop-blur-3xl border-l border-white/5 shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.5)] z-10">
+                <div className="w-full max-w-sm space-y-8">
+                    <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">VC</span>
+                        </div>
+                        <span className="font-bold text-2xl tracking-tight text-white">Scout</span>
+                    </div>
+
+                    <div className="space-y-2 text-center lg:text-left">
+                        <h1 className="text-3xl font-bold tracking-tight text-white">Welcome back</h1>
+                        <p className="text-muted-foreground">Sign in to your dashboard to continue scouting.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-zinc-300">Email address</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="analyst@fund.com"
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus-visible:ring-blue-500 h-12"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="password" className="text-zinc-300">Password</Label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className="bg-white/5 border-white/10 text-white placeholder:text-zinc-600 focus-visible:ring-blue-500 h-12"
+                                />
+                            </div>
                         </div>
 
                         {error && (
-                            <div className="text-destructive text-sm bg-destructive/10 border border-destructive/20 p-3 rounded-lg text-center font-medium">
+                            <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center font-medium animate-in fade-in slide-in-from-top-2">
                                 {error}
                             </div>
                         )}
-                    </CardContent>
 
-                    <CardFooter>
-                        <Button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-                            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                            {loading ? 'Signing in...' : 'Sign in'}
+                        <Button type="submit" disabled={loading} className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base transition-all group">
+                            {loading ? (
+                                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            ) : (
+                                <>
+                                    Sign in to Dashboard
+                                    <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
                         </Button>
-                    </CardFooter>
-                </form>
-            </Card>
+                    </form>
+
+                    <p className="text-center text-sm text-zinc-400">
+                        Don't have an account?{' '}
+                        <Link href="/signup" className="text-blue-400 hover:text-blue-300 font-medium">
+                            Create one free
+                        </Link>
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }

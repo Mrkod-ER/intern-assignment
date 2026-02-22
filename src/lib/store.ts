@@ -256,8 +256,8 @@ export const useAppStore = create<AppState>()(
         }),
         {
             name: 'vc-scout-storage',
-            // Only cache non-sensitive fast-access data locally
             partialize: (state) => ({
+                user: state.user,
                 thesis: state.thesis,
                 notes: state.notes,
                 companyStatuses: state.companyStatuses,

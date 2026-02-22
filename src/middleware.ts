@@ -22,8 +22,8 @@ export async function middleware(request: NextRequest) {
         try {
             await jwtVerify(token, encodedKey);
 
-            // Redirect authenticated users away from auth pages
-            if (isAuthRoute) {
+            // Redirect authenticated users away from auth pages and landing page
+            if (isAuthRoute || request.nextUrl.pathname === '/') {
                 return NextResponse.redirect(new URL('/companies', request.url));
             }
         } catch (error) {
