@@ -2,10 +2,11 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { mockCompanies } from '@/data/mockCompanies';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { useAppStore } from '@/lib/store';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, Filter, SlidersHorizontal, ChevronLeft, ChevronRight, BookmarkPlus } from 'lucide-react';
 
 function CompaniesContent() {
@@ -73,46 +74,46 @@ function CompaniesContent() {
             </div>
 
             <div className="bg-card rounded-xl border border-border overflow-hidden">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-neutral-900/50 text-neutral-400 border-b border-border">
-                        <tr>
-                            <th className="px-6 py-4 font-medium">Company</th>
-                            <th className="px-6 py-4 font-medium">Industry</th>
-                            <th className="px-6 py-4 font-medium">Stage</th>
-                            <th className="px-6 py-4 font-medium">Location</th>
-                            <th className="px-6 py-4 font-medium text-right">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
+                <Table>
+                    <TableHeader className="bg-muted/50">
+                        <TableRow>
+                            <TableHead className="font-medium">Company</TableHead>
+                            <TableHead className="font-medium">Industry</TableHead>
+                            <TableHead className="font-medium">Stage</TableHead>
+                            <TableHead className="font-medium">Location</TableHead>
+                            <TableHead className="font-medium text-right">Status</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {paginatedCompanies.map((company) => (
-                            <tr
+                            <TableRow
                                 key={company.id}
                                 onClick={() => router.push(`/companies/${company.id}`)}
-                                className="hover:bg-neutral-800/50 transition-colors cursor-pointer group"
+                                className="cursor-pointer group hover:bg-muted/50 transition-colors"
                             >
-                                <td className="px-6 py-4">
-                                    <div className="font-medium text-white group-hover:text-blue-400 transition-colors">{company.name}</div>
-                                    <div className="text-neutral-500 text-xs mt-1 max-w-xs truncate">{company.description}</div>
-                                </td>
-                                <td className="px-6 py-4"><Badge variant="outline">{company.industry}</Badge></td>
-                                <td className="px-6 py-4 text-neutral-300">{company.stage}</td>
-                                <td className="px-6 py-4 text-neutral-400">{company.hq}</td>
-                                <td className="px-6 py-4 text-right">
+                                <TableCell>
+                                    <div className="font-medium text-foreground group-hover:text-blue-500 transition-colors">{company.name}</div>
+                                    <div className="text-muted-foreground text-xs mt-1 max-w-xs truncate">{company.description}</div>
+                                </TableCell>
+                                <TableCell><Badge variant="outline">{company.industry}</Badge></TableCell>
+                                <TableCell className="text-muted-foreground">{company.stage}</TableCell>
+                                <TableCell className="text-muted-foreground">{company.hq}</TableCell>
+                                <TableCell className="text-right">
                                     <Badge variant={company.status === 'new' ? 'default' : company.status === 'contacted' ? 'secondary' : 'outline'}>
                                         {company.status}
                                     </Badge>
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         ))}
                         {paginatedCompanies.length === 0 && (
-                            <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-neutral-500">
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                                     No companies found matching your filters.
-                                </td>
-                            </tr>
+                                </TableCell>
+                            </TableRow>
                         )}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
 
             {totalPages > 1 && (

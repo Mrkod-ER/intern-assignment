@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,14 +19,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} min-h-screen bg-background text-foreground flex`}>
-        <Sidebar className="w-64 hidden md:flex" />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-          <Topbar />
-          <main className="flex-1 overflow-y-auto w-full">
-            {children}
-          </main>
-        </div>
+      <body className={`${inter.className} min-h-screen bg-background text-foreground`}>
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <Topbar />
+            <main className="flex-1 overflow-y-auto w-full">
+              {children}
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
       </body>
     </html>
   );

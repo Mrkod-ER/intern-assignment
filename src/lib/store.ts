@@ -16,6 +16,8 @@ export interface SavedSearch {
 }
 
 interface AppState {
+    user: { id: string; email: string; name: string } | null;
+    setUser: (user: { id: string; email: string; name: string } | null) => void;
     lists: CompanyList[];
     savedSearches: SavedSearch[];
     notes: Record<string, string>;
@@ -31,6 +33,8 @@ interface AppState {
 export const useAppStore = create<AppState>()(
     persist(
         (set) => ({
+            user: null,
+            setUser: (user) => set({ user }),
             lists: [],
             savedSearches: [],
             notes: {},

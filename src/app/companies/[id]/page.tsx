@@ -3,10 +3,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { mockCompanies } from '@/data/mockCompanies';
 import { useAppStore } from '@/lib/store';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { ArrowLeft, Building2, ExternalLink, Sparkles, Loader2, BookmarkPlus, MapPin, Calendar, Clock } from 'lucide-react';
-import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, Building2, ExternalLink, Sparkles, Loader2, BookmarkPlus, MapPin, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function CompanyProfilePage() {
@@ -24,7 +34,6 @@ export default function CompanyProfilePage() {
         }
     }, [company, notes]);
 
-    // Use localStorage to cache enrichment data for the session
     useEffect(() => {
         if (id) {
             const cached = localStorage.getItem(`enrichment_${id}`);
@@ -35,7 +44,7 @@ export default function CompanyProfilePage() {
     }, [id]);
 
     if (!company) {
-        return <div className="p-8 text-center text-neutral-400">Company not found.</div>;
+        return <div className="p-8 text-center text-muted-foreground">Company not found.</div>;
     }
 
     const handleEnrich = async () => {
@@ -46,7 +55,6 @@ export default function CompanyProfilePage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: company.website.replace('https://', '').replace('http://', '') })
             });
-
             const data = await res.json();
             if (res.ok) {
                 setEnrichedData(data);
@@ -65,169 +73,202 @@ export default function CompanyProfilePage() {
         <div className="p-8 max-w-5xl mx-auto space-y-8">
             {/* Header */}
             <div>
-                <button onClick={() => router.back()} className="text-neutral-500 hover:text-white flex items-center text-sm mb-6 transition-colors">
+                <Button variant="ghost" size="sm" onClick={() => router.back()} className="text-muted-foreground mb-5 -ml-2 hover:text-foreground">
                     <ArrowLeft className="w-4 h-4 mr-2" /> Back to Discover
-                </button>
+                </Button>
 
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center space-x-5">
-                        <div className="w-16 h-16 bg-neutral-800 rounded-xl border border-border flex items-center justify-center">
-                            <Building2 className="w-8 h-8 text-neutral-400" />
+                        <div className="w-16 h-16 bg-muted rounded-xl border border-border flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-8 h-8 text-muted-foreground" />
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">{company.name}</h1>
-                            <div className="flex items-center space-x-3 mt-2 text-sm text-neutral-400">
-                                <a href={company.website} target="_blank" rel="noreferrer" className="flex items-center hover:text-blue-400 transition-colors">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-sm text-muted-foreground">
+                                <a href={company.website} target="_blank" rel="noreferrer" className="flex items-center hover:text-foreground transition-colors">
                                     {company.website.replace('https://', '')} <ExternalLink className="w-3 h-3 ml-1" />
                                 </a>
                                 <span>&bull;</span>
-                                <span className="flex items-center"><MapPin className="w-3 h-3 mr-1" />{company.hq}</span>
+                                <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{company.hq}</span>
                                 <span>&bull;</span>
-                                <span className="flex items-center"><Calendar className="w-3 h-3 mr-1" />Founded {company.founded}</span>
+                                <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />Founded {company.founded}</span>
                             </div>
                         </div>
-                        <div className="flex items-center space-x-3 relative">
-                            {lists.length > 0 ? (
-                                <div className="relative group">
-                                    <Button variant="outline"><BookmarkPlus className="w-4 h-4 mr-2" /> Save to List</Button>
-                                    <div className="absolute right-0 top-full mt-2 w-48 bg-neutral-900 border border-border rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                                        <div className="p-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Your Lists</div>
-                                        <ul className="max-h-64 overflow-y-auto">
-                                            {lists.map(list => {
-                                                const isSaved = list.companyIds.includes(company.id);
-                                                return (
-                                                    <li key={list.id}>
-                                                        <button
-                                                            onClick={() => isSaved ? removeCompanyFromList(list.id, company.id) : addCompanyToList(list.id, company.id)}
-                                                            className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-800 transition-colors flex items-center justify-between"
-                                                        >
-                                                            <span className="truncate mr-2">{list.name}</span>
-                                                            {isSaved && <span className="text-blue-400 text-xs flex-shrink-0">Saved</span>}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    </div>
-                                </div>
-                            ) : (
-                                <Button variant="outline" onClick={() => router.push('/lists')}><BookmarkPlus className="w-4 h-4 mr-2" /> Create List</Button>
-                            )}
-                            <Button onClick={handleEnrich} disabled={enriching} className="bg-blue-600 hover:bg-blue-700 text-white border-0">
-                                {enriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                                {enriching ? 'Enriching...' : 'Live Enrich'}
-                            </Button>
-                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                        {/* Save to List Dropdown */}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    <BookmarkPlus className="w-4 h-4 mr-2" />
+                                    {lists.length > 0 ? 'Save to List' : 'Create List'}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52">
+                                {lists.length > 0 ? (
+                                    <>
+                                        <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Your Lists</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        {lists.map(list => {
+                                            const isSaved = list.companyIds.includes(company.id);
+                                            return (
+                                                <DropdownMenuItem
+                                                    key={list.id}
+                                                    onClick={() => isSaved ? removeCompanyFromList(list.id, company.id) : addCompanyToList(list.id, company.id)}
+                                                    className="cursor-pointer justify-between"
+                                                >
+                                                    <span className="truncate mr-2">{list.name}</span>
+                                                    {isSaved && <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />}
+                                                </DropdownMenuItem>
+                                            );
+                                        })}
+                                    </>
+                                ) : (
+                                    <DropdownMenuItem onClick={() => router.push('/lists')} className="cursor-pointer">
+                                        Create a new list
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <Button onClick={handleEnrich} disabled={enriching} className="bg-blue-600 hover:bg-blue-700 text-white border-0">
+                            {enriching ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                            {enriching ? 'Enriching...' : 'Live Enrich'}
+                        </Button>
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-3 gap-6">
-                {/* Main Content Area */}
+                {/* Main Content */}
                 <div className="col-span-2 space-y-6">
-                    <div className="bg-card p-6 rounded-xl border border-border">
-                        <h2 className="text-lg font-semibold mb-4">Overview</h2>
-                        <p className="text-neutral-300 leading-relaxed text-sm">
-                            {enrichedData?.summary || company.description}
-                        </p>
-
-                        <div className="flex flex-wrap gap-2 mt-6">
-                            <Badge variant="secondary">{company.industry}</Badge>
-                            <Badge variant="secondary">{company.stage}</Badge>
-                            {enrichedData?.keywords?.map((kw: string) => (
-                                <Badge key={kw} variant="outline" className="text-neutral-400 border-neutral-700">{kw}</Badge>
-                            ))}
-                        </div>
-                    </div>
-
-                    {enrichedData && (
-                        <div className="bg-[#0f1015] p-6 rounded-xl border border-blue-900/30 relative overflow-hidden group">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/5 blur-[50px] -mr-10 -mt-10 rounded-full pointer-events-none"></div>
-                            <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-lg font-semibold flex items-center text-blue-100">
-                                    <Sparkles className="w-4 h-4 mr-2 text-blue-400" /> What they do
-                                </h2>
-                                <div className="text-xs text-neutral-500 font-medium">AI Enriched</div>
-                            </div>
-                            <ul className="space-y-3">
-                                {enrichedData.whatTheyDo?.map((bullet: string, i: number) => (
-                                    <li key={i} className="flex items-start text-sm text-blue-50/70">
-                                        <span className="text-blue-500 mr-3 mt-1 text-xs">◆</span>
-                                        <span className="leading-relaxed">{bullet}</span>
-                                    </li>
+                    {/* Overview Card */}
+                    <Card className="border-border">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base font-semibold">Overview</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-muted-foreground leading-relaxed text-sm">
+                                {enrichedData?.summary || company.description}
+                            </p>
+                            <Separator />
+                            <div className="flex flex-wrap gap-2">
+                                <Badge variant="secondary">{company.industry}</Badge>
+                                <Badge variant="secondary">{company.stage}</Badge>
+                                {enrichedData?.keywords?.map((kw: string) => (
+                                    <Badge key={kw} variant="outline" className="text-muted-foreground">{kw}</Badge>
                                 ))}
-                            </ul>
-                        </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* AI Enrichment Panel */}
+                    {enrichedData && (
+                        <Card className="border-blue-900/40 bg-[#0f1015] relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-blue-600/5 blur-[60px] -mr-10 -mt-10 rounded-full pointer-events-none" />
+                            <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-base font-semibold flex items-center gap-2 text-blue-100">
+                                        <Sparkles className="w-4 h-4 text-blue-400" /> What they do
+                                    </CardTitle>
+                                    <Badge variant="secondary" className="text-xs bg-blue-900/30 text-blue-300 border-blue-800/50">AI Enriched</Badge>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-3">
+                                    {enrichedData.whatTheyDo?.map((bullet: string, i: number) => (
+                                        <li key={i} className="flex items-start text-sm text-blue-50/70">
+                                            <span className="text-blue-500 mr-3 mt-1 text-xs flex-shrink-0">◆</span>
+                                            <span className="leading-relaxed">{bullet}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
                     )}
 
-                    <div className="bg-card p-6 rounded-xl border border-border">
-                        <h2 className="text-lg font-semibold mb-5">Timeline & Signals</h2>
-                        <div className="space-y-6">
-                            {enrichedData?.derivedSignals?.map((signal: string, i: number) => (
-                                <div key={i} className="flex relative items-start">
-                                    <div className="absolute left-2.5 top-5 bottom-[-1.5rem] w-px bg-border group-last:hidden"></div>
-                                    <div className="w-5 h-5 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5 z-10">
-                                        <Sparkles className="w-3 h-3 text-blue-400" />
-                                    </div>
-                                    <div className="ml-4">
-                                        <p className="text-sm font-medium text-blue-100">Derived Signal</p>
-                                        <p className="text-sm text-neutral-400 mt-1">{signal}</p>
-                                        <p className="text-xs text-neutral-600 mt-2 flex items-center">
-                                            <Clock className="w-3 h-3 mr-1" /> Found via Live Scrape
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-
-                            <div className="flex relative items-start">
-                                <div className="absolute left-2.5 top-5 bottom-[-1.5rem] w-px bg-border last:hidden"></div>
-                                <div className="w-5 h-5 rounded-full bg-neutral-800 border border-border flex items-center justify-center shrink-0 mt-0.5 z-10">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-neutral-500"></div>
-                                </div>
-                                <div className="ml-4">
-                                    <p className="text-sm font-medium text-white">Added to system</p>
-                                    <p className="text-xs text-neutral-500 mt-1">Found via internal database</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Sidebar constraints */}
-                <div className="space-y-6">
-                    <div className="bg-card p-5 rounded-xl border border-border">
-                        <h3 className="text-sm font-semibold mb-3 text-neutral-200">Sources</h3>
-                        {enrichedData?.sources ? (
-                            <div className="space-y-3">
-                                {enrichedData.sources.map((src: any, i: number) => (
-                                    <div key={i} className="text-xs">
-                                        <a href={src.url.replace('https://r.jina.ai/', 'https://')} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline truncate block">
-                                            {src.url.replace('https://r.jina.ai/', '')}
-                                        </a>
-                                        <p className="text-neutral-500 mt-1">{format(new Date(src.timestamp), 'MMM dd, yyyy HH:mm')}</p>
+                    {/* Timeline & Signals Card */}
+                    <Card className="border-border">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-base font-semibold">Timeline &amp; Signals</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-6">
+                                {enrichedData?.derivedSignals?.map((signal: string, i: number) => (
+                                    <div key={i} className="flex relative items-start">
+                                        <div className="absolute left-2.5 top-5 bottom-[-1.5rem] w-px bg-border" />
+                                        <div className="w-5 h-5 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 mt-0.5 z-10">
+                                            <Sparkles className="w-3 h-3 text-blue-400" />
+                                        </div>
+                                        <div className="ml-4">
+                                            <p className="text-sm font-medium text-blue-100">Derived Signal</p>
+                                            <p className="text-sm text-muted-foreground mt-1">{signal}</p>
+                                            <p className="text-xs text-muted-foreground/60 mt-2 flex items-center gap-1">
+                                                <Clock className="w-3 h-3" /> Found via Live Scrape
+                                            </p>
+                                        </div>
                                     </div>
                                 ))}
-                            </div>
-                        ) : (
-                            <p className="text-xs text-neutral-500">No external sources scanned yet.</p>
-                        )}
-                    </div>
 
-                    <div className="bg-card p-5 rounded-xl border border-border">
-                        <h3 className="text-sm font-semibold mb-3 text-neutral-200">Notes</h3>
-                        <textarea
-                            className="w-full h-24 bg-background border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-neutral-700 resize-none placeholder:text-neutral-600"
-                            placeholder="Add your thesis thoughts here..."
-                            value={localNote}
-                            onChange={(e) => setLocalNote(e.target.value)}
-                        ></textarea>
-                        <div className="mt-3 flex justify-end">
-                            <Button size="sm" variant="secondary" onClick={() => saveNote(company.id, localNote)}>Save Note</Button>
-                        </div>
-                    </div>
+                                <div className="flex items-start">
+                                    <div className="w-5 h-5 rounded-full bg-muted border border-border flex items-center justify-center shrink-0 mt-0.5">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground" />
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-sm font-medium text-foreground">Added to system</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Found via internal database</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right Sidebar */}
+                <div className="space-y-6">
+                    {/* Sources Card */}
+                    <Card className="border-border">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold">Sources</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {enrichedData?.sources ? (
+                                <div className="space-y-3">
+                                    {enrichedData.sources.map((src: any, i: number) => (
+                                        <div key={i} className="text-xs">
+                                            <a href={src.url.replace('https://r.jina.ai/', 'https://')} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline truncate block">
+                                                {src.url.replace('https://r.jina.ai/', '')}
+                                            </a>
+                                            <p className="text-muted-foreground/70 mt-1">{format(new Date(src.timestamp), 'MMM dd, yyyy HH:mm')}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-muted-foreground">No external sources scanned yet.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Notes Card */}
+                    <Card className="border-border">
+                        <CardHeader className="pb-3">
+                            <CardTitle className="text-sm font-semibold">Notes</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                            <Textarea
+                                className="h-28 resize-none bg-background text-sm placeholder:text-muted-foreground/60 focus-visible:ring-1"
+                                placeholder="Add your thesis thoughts here..."
+                                value={localNote}
+                                onChange={(e) => setLocalNote(e.target.value)}
+                            />
+                            <Button size="sm" variant="secondary" className="w-full" onClick={() => saveNote(company.id, localNote)}>
+                                Save Note
+                            </Button>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </div>
     );
 }
-
