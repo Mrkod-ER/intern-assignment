@@ -5,11 +5,39 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { mockCompanies } from '@/data/mockCompanies';
-import { ListVideo, Trash2 } from 'lucide-react';
+import { ListVideo, Trash2, Download } from 'lucide-react';
 
 export default function ListsPage() {
-    const { lists, addList, removeList, removeCompanyFromList } = useAppStore();
+    const { lists, addList, removeList, removeCompanyFromList, customCompanies, notes } = useAppStore();
     const [newListName, setNewListName] = useState('');
+
+    // Merge mock + scouted companies so list items always resolve
+    const allCompanies = [...customCompanies, ...mockCompanies];
+
+    const exportCSV = (listId: string, listName: string) => {
+        const list = lists.find(l => l.id === listId);
+        if (!list) return;
+        const companies = list.companyIds.map(id => allCompanies.find(c => c.id === id)).filter(Boolean);
+        const headers = ['Name', 'Website', 'Industry', 'Stage', 'HQ', 'Founded', 'Tags', 'Notes'];
+        const rows = companies.map(c => [
+            c!.name,
+            c!.website,
+            c!.industry,
+            c!.stage,
+            c!.hq,
+            c!.founded,
+            (c!.tags || []).join(';'),
+            (notes[c!.id] || '').replace(/\n/g, ' '),
+        ]);
+        const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${listName.replace(/[^a-z0-9]/gi, '_')}_export.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const handleCreateList = (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,7 +81,9 @@ export default function ListsPage() {
                             <div className="p-4 border-b border-border flex justify-between items-center bg-muted/20">
                                 <h2 className="text-lg font-semibold">{list.name}</h2>
                                 <div className="flex gap-2">
-                                    <Button variant="outline" size="sm">Export CSV</Button>
+                                    <Button variant="outline" size="sm" onClick={() => exportCSV(list.id, list.name)}>
+                                        <Download className="w-3.5 h-3.5 mr-1.5" /> Export CSV
+                                    </Button>
                                     <Button variant="ghost" size="sm" onClick={() => removeList(list.id)} className="text-destructive hover:text-destructive/80">
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
@@ -67,7 +97,7 @@ export default function ListsPage() {
                             ) : (
                                 <ul className="divide-y divide-border">
                                     {list.companyIds.map(companyId => {
-                                        const company = mockCompanies.find(c => c.id === companyId);
+                                        const company = allCompanies.find(c => c.id === companyId);
                                         if (!company) return null;
                                         return (
                                             <li key={company.id} className="p-4 flex items-center justify-between hover:bg-muted/30">

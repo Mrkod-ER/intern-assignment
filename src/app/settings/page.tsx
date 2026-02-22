@@ -17,7 +17,7 @@ const ALL_INDUSTRIES = [
 ];
 
 export default function SettingsPage() {
-    const { thesis, setThesis } = useAppStore();
+    const { thesis, saveThesisToDB } = useAppStore();
     const [form, setForm] = useState<FundThesis>(thesis);
     const [saved, setSaved] = useState(false);
 
@@ -36,7 +36,7 @@ export default function SettingsPage() {
     };
 
     const handleSave = () => {
-        setThesis(form);
+        saveThesisToDB(form);
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
     };
@@ -108,8 +108,8 @@ export default function SettingsPage() {
                                     key={stage}
                                     onClick={() => toggleStage(stage)}
                                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${active
-                                            ? 'bg-primary text-primary-foreground border-primary'
-                                            : 'bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
                                         }`}
                                 >
                                     {active && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -135,8 +135,8 @@ export default function SettingsPage() {
                                     key={industry}
                                     onClick={() => toggleIndustry(industry)}
                                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${active
-                                            ? 'bg-primary text-primary-foreground border-primary'
-                                            : 'bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
                                         }`}
                                 >
                                     {active && <CheckCircle2 className="w-3.5 h-3.5" />}

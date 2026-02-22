@@ -4,6 +4,7 @@ import "./globals.css";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { DBInitializer } from "@/components/DBInitializer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <AppSidebar />
           <SidebarInset>
             <Topbar />
+            <DBInitializer />
             <main className="flex-1 overflow-y-auto w-full">
               {children}
             </main>

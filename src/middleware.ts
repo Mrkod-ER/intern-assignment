@@ -11,7 +11,8 @@ export async function middleware(request: NextRequest) {
     const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup');
     const isProtectedRoute = request.nextUrl.pathname.startsWith('/companies') ||
         request.nextUrl.pathname.startsWith('/lists') ||
-        request.nextUrl.pathname.startsWith('/saved');
+        request.nextUrl.pathname.startsWith('/saved') ||
+        request.nextUrl.pathname.startsWith('/settings');
 
     if (!token && isProtectedRoute) {
         return NextResponse.redirect(new URL('/login', request.url));

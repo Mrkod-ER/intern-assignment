@@ -45,7 +45,7 @@ const SCORE_BG = (score: number) => {
 export default function CompanyProfilePage() {
     const { id } = useParams();
     const router = useRouter();
-    const { lists, addCompanyToList, removeCompanyFromList, notes, saveNote, thesis, customCompanies } = useAppStore();
+    const { lists, addCompanyToList, removeCompanyFromList, notes, saveNote, thesis, customCompanies, companyStatuses, updateCompanyStatus } = useAppStore();
     const company = useMemo(
         () => customCompanies.find(c => c.id === id) || mockCompanies.find(c => c.id === id),
         [id, customCompanies]
@@ -69,8 +69,19 @@ export default function CompanyProfilePage() {
         }
     }, [id]);
 
+    // Auto-mark as viewed when profile is opened
+    useEffect(() => {
+        if (id && typeof id === 'string') {
+            const currentStatus = companyStatuses[id];
+            if (!currentStatus || currentStatus === 'new') {
+                updateCompanyStatus(id, 'viewed');
+            }
+        }
+    }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
     if (!company) return <div className="p-8 text-center text-muted-foreground">Company not found.</div>;
 
+    const currentStatus = companyStatuses[typeof id === 'string' ? id : ''] || 'viewed';
     const thesisConfigured = thesis.description?.trim().length > 10;
 
     const handleEnrich = async () => {
@@ -144,6 +155,23 @@ export default function CompanyProfilePage() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
+                        {/* Status selector */}
+                        <div className="flex items-center bg-muted rounded-lg p-1 gap-1">
+                            {(['new', 'viewed', 'contacted'] as const).map(s => (
+                                <button
+                                    key={s}
+                                    onClick={() => updateCompanyStatus(typeof id === 'string' ? id : '', s)}
+                                    className={`px-3 py-1 rounded-md text-xs font-medium capitalize transition-all ${currentStatus === s
+                                            ? s === 'contacted' ? 'bg-green-600 text-white'
+                                                : s === 'viewed' ? 'bg-blue-600 text-white'
+                                                    : 'bg-primary text-primary-foreground'
+                                            : 'text-muted-foreground hover:text-foreground'
+                                        }`}
+                                >
+                                    {s}
+                                </button>
+                            ))}
+                        </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline">

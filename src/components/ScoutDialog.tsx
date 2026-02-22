@@ -92,7 +92,7 @@ export function ScoutDialog({ children }: ScoutDialogProps) {
                 tags: data.keywords?.slice(0, 5) || [],
             };
 
-            addCustomCompany(company);
+            addCustomCompany(company, data);
 
             // Pre-cache enrichment in localStorage
             localStorage.setItem(`enrichment_${id}`, JSON.stringify(data));
