@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { Company } from '@/data/mockCompanies';
 
 export interface CompanyList {
     id: string;
@@ -49,6 +50,9 @@ interface AppState {
     removeCompanyFromList: (listId: string, companyId: string) => void;
     saveSearch: (query: string, filters: Record<string, string>) => void;
     removeSavedSearch: (id: string) => void;
+    customCompanies: Company[];
+    addCustomCompany: (company: Company) => void;
+    removeCustomCompany: (id: string) => void;
     saveNote: (companyId: string, note: string) => void;
 }
 
@@ -61,6 +65,7 @@ export const useAppStore = create<AppState>()(
             setThesis: (thesis) => set({ thesis }),
             lists: [],
             savedSearches: [],
+            customCompanies: [],
             notes: {},
 
             addList: (name) => set((state) => ({
@@ -93,6 +98,14 @@ export const useAppStore = create<AppState>()(
 
             removeSavedSearch: (id) => set((state) => ({
                 savedSearches: state.savedSearches.filter((s) => s.id !== id)
+            })),
+
+            addCustomCompany: (company) => set((state) => ({
+                customCompanies: [company, ...state.customCompanies.filter(c => c.id !== company.id)]
+            })),
+
+            removeCustomCompany: (id) => set((state) => ({
+                customCompanies: state.customCompanies.filter(c => c.id !== id)
             })),
 
             saveNote: (companyId, note) => set((state) => ({

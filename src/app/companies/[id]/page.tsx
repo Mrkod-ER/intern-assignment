@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { mockCompanies } from '@/data/mockCompanies';
 import { useAppStore } from '@/lib/store';
@@ -45,8 +45,11 @@ const SCORE_BG = (score: number) => {
 export default function CompanyProfilePage() {
     const { id } = useParams();
     const router = useRouter();
-    const company = mockCompanies.find(c => c.id === id);
-    const { lists, addCompanyToList, removeCompanyFromList, notes, saveNote, thesis } = useAppStore();
+    const { lists, addCompanyToList, removeCompanyFromList, notes, saveNote, thesis, customCompanies } = useAppStore();
+    const company = useMemo(
+        () => customCompanies.find(c => c.id === id) || mockCompanies.find(c => c.id === id),
+        [id, customCompanies]
+    );
     const [enriching, setEnriching] = useState(false);
     const [scoring, setScoring] = useState(false);
     const [enrichedData, setEnrichedData] = useState<any>(null);

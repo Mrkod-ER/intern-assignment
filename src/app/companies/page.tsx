@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { Search, ChevronLeft, ChevronRight, BookmarkPlus, X, SlidersHorizontal } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, BookmarkPlus, X, SlidersHorizontal, Globe } from 'lucide-react';
+import { ScoutDialog } from '@/components/ScoutDialog';
 
 const ALL_STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Series D', 'Late Stage', 'Public'];
 const ALL_INDUSTRIES = Array.from(new Set(mockCompanies.map(c => c.industry))).sort();
@@ -29,6 +30,7 @@ function CompaniesContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const initialQuery = searchParams.get('q') || '';
+    const customCompanies = useAppStore(s => s.customCompanies);
 
     const [search, setSearch] = useState(initialQuery);
     const [selectedStages, setSelectedStages] = useState<string[]>([]);
@@ -49,8 +51,10 @@ function CompaniesContent() {
         setPage(1);
     };
 
+    const allCompanies = useMemo(() => [...customCompanies, ...mockCompanies], [customCompanies]);
+
     const filteredCompanies = useMemo(() => {
-        return mockCompanies.filter(c => {
+        return allCompanies.filter(c => {
             const matchSearch = !search ||
                 c.name.toLowerCase().includes(search.toLowerCase()) ||
                 c.description.toLowerCase().includes(search.toLowerCase()) ||
@@ -58,8 +62,8 @@ function CompaniesContent() {
             const matchStage = selectedStages.length === 0 || selectedStages.includes(c.stage);
             const matchIndustry = selectedIndustries.length === 0 || selectedIndustries.includes(c.industry);
             const matchHq = !selectedHq || c.hq.toLowerCase().includes(selectedHq.toLowerCase());
-            const matchFrom = !foundedFrom || parseInt(c.founded) >= parseInt(foundedFrom);
-            const matchTo = !foundedTo || parseInt(c.founded) <= parseInt(foundedTo);
+            const matchFrom = !foundedFrom || c.founded === 'Unknown' || parseInt(c.founded) >= parseInt(foundedFrom);
+            const matchTo = !foundedTo || c.founded === 'Unknown' || parseInt(c.founded) <= parseInt(foundedTo);
             return matchSearch && matchStage && matchIndustry && matchHq && matchFrom && matchTo;
         });
     }, [search, selectedStages, selectedIndustries, selectedHq, foundedFrom, foundedTo]);
@@ -87,7 +91,7 @@ function CompaniesContent() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Discover Companies</h1>
                     <p className="text-muted-foreground mt-1">
-                        {filteredCompanies.length} of {mockCompanies.length} companies match your criteria.
+                        {filteredCompanies.length} of {allCompanies.length} companies match your criteria.
                     </p>
                 </div>
                 <div className="flex gap-3">
@@ -99,6 +103,12 @@ function CompaniesContent() {
                         <BookmarkPlus className="w-4 h-4 mr-2" /> Save Search
                     </Button>
                     <Button onClick={() => router.push('/lists')}>Create List</Button>
+                    <ScoutDialog>
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white border-0 gap-2">
+                            <Globe className="w-4 h-4" />
+                            Scout a Company
+                        </Button>
+                    </ScoutDialog>
                 </div>
             </div>
 
@@ -140,8 +150,8 @@ function CompaniesContent() {
                                     key={s}
                                     onClick={() => toggleStage(s)}
                                     className={`px-3 py-1 rounded-full text-sm font-medium border transition-all ${selectedStages.includes(s)
-                                            ? 'bg-primary text-primary-foreground border-primary'
-                                            : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-background text-muted-foreground border-border hover:border-primary/50'
                                         }`}
                                 >
                                     {s}
@@ -161,8 +171,8 @@ function CompaniesContent() {
                                     key={i}
                                     onClick={() => toggleIndustry(i)}
                                     className={`px-3 py-1 rounded-full text-sm font-medium border transition-all ${selectedIndustries.includes(i)
-                                            ? 'bg-primary text-primary-foreground border-primary'
-                                            : 'bg-background text-muted-foreground border-border hover:border-primary/50'
+                                        ? 'bg-primary text-primary-foreground border-primary'
+                                        : 'bg-background text-muted-foreground border-border hover:border-primary/50'
                                         }`}
                                 >
                                     {i}
@@ -240,7 +250,12 @@ function CompaniesContent() {
                                 className="cursor-pointer group hover:bg-muted/50 transition-colors"
                             >
                                 <TableCell>
-                                    <div className="font-medium text-foreground group-hover:text-primary transition-colors">{company.name}</div>
+                                    <div className="font-medium text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                                        {company.name}
+                                        {company.id.startsWith('custom_') && (
+                                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-medium">Scouted</span>
+                                        )}
+                                    </div>
                                     <div className="text-muted-foreground text-xs mt-0.5 max-w-xs truncate">{company.description}</div>
                                     {company.tags && company.tags.length > 0 && (
                                         <div className="flex gap-1 mt-1.5 flex-wrap">
