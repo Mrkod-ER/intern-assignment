@@ -12,7 +12,7 @@ async function getUserId(): Promise<string | null> {
     if (!token) return null;
     try {
         const { payload } = await jwtVerify(token, encodedKey);
-        return payload.id as string;
+        return (payload.id || payload.userId) as string;
     } catch { return null; }
 }
 
