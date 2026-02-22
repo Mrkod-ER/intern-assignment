@@ -15,9 +15,31 @@ export interface SavedSearch {
     createdAt: number;
 }
 
+export interface FundThesis {
+    fundName: string;
+    description: string;
+    stages: string[];
+    industries: string[];
+    geography: string;
+    checkSizeMin: string;
+    checkSizeMax: string;
+}
+
+const DEFAULT_THESIS: FundThesis = {
+    fundName: '',
+    description: '',
+    stages: [],
+    industries: [],
+    geography: '',
+    checkSizeMin: '',
+    checkSizeMax: '',
+};
+
 interface AppState {
     user: { id: string; email: string; name: string } | null;
     setUser: (user: { id: string; email: string; name: string } | null) => void;
+    thesis: FundThesis;
+    setThesis: (thesis: FundThesis) => void;
     lists: CompanyList[];
     savedSearches: SavedSearch[];
     notes: Record<string, string>;
@@ -35,6 +57,8 @@ export const useAppStore = create<AppState>()(
         (set) => ({
             user: null,
             setUser: (user) => set({ user }),
+            thesis: DEFAULT_THESIS,
+            setThesis: (thesis) => set({ thesis }),
             lists: [],
             savedSearches: [],
             notes: {},

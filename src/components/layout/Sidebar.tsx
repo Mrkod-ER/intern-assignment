@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, Bookmark, ListVideo, Layers } from 'lucide-react';
+import { LayoutGrid, Bookmark, ListVideo, Layers, Settings } from 'lucide-react';
 import {
     Sidebar,
     SidebarContent,
@@ -22,6 +22,7 @@ const navItems = [
     { name: 'Discover', href: '/companies', icon: LayoutGrid },
     { name: 'Lists', href: '/lists', icon: ListVideo },
     { name: 'Saved Searches', href: '/saved', icon: Bookmark },
+    { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
